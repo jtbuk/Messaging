@@ -11,6 +11,6 @@ public static class SetupMockApplicationsFeature
 
     public static void RegisterMockConsumers(this IBusRegistrationConfigurator config)
     {
-        config.AddConsumer<GettingStartedConsumer>();
+        //config.AddConsumer<Consumer>();
     }
 }

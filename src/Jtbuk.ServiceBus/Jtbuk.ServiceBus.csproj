@@ -17,12 +17,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Features\Entitlements\Actions\" />
-	  <Folder Include="Features\Tenants\Actions\" />
-	  <Folder Include="Features\Users\Actions\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<InternalsVisibleTo Include="Jtbuk.IntegrationTests" />
 	</ItemGroup>
 

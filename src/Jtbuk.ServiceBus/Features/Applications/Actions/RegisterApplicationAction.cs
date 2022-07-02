@@ -1,5 +1,6 @@
 ﻿using Jtbuk.ServiceBus.Data;
 using Jtbuk.ServiceBus.Data.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Jtbuk.ServiceBus.Features.Applications;
 
@@ -8,7 +9,7 @@ public record RegisterApplicationDto(string Name, Guid UniqueId, List<RegisterRo
 
 public static class RegisterApplicationAction
 {
-    public static async Task Invoke(RegisterApplicationDto dto, DatabaseContext context)
+    public static async Task Invoke([FromBody] RegisterApplicationDto dto, DatabaseContext context)
     {
         var application = context.Applications.SingleOrDefault(a => a.UniqueId == dto.UniqueId);
 
