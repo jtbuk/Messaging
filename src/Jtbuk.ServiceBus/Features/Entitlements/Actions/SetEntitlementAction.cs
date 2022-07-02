@@ -11,7 +11,9 @@ public record NotifyEntitlementDto(Guid UserUniqueId, Guid ApplicationUniqueId, 
 
 public static class SetEntitlementAction
 {
-    public static async Task<Guid> Invoke([FromBody] SetEntitlementDto dto, DatabaseContext context, IBus bus)
+    public static async Task<Guid> Invoke([FromBody] SetEntitlementDto dto, 
+        DatabaseContext context,
+        IPublishEndpoint publishEndpoint)
     {        
         if (!context.Users.Any(u => u.UniqueId == dto.UserUniqueId))
         {
@@ -38,7 +40,9 @@ public static class SetEntitlementAction
 
         await context.SaveChangesAsync();
 
-        await bus.Publish(new NotifyEntitlementDto(dto.UserUniqueId, dto.RoleUniqueId, dto.ApplicationUniqueId));
+        var notifyEntitlementDto = new NotifyEntitlementDto(dto.UserUniqueId, dto.RoleUniqueId, dto.ApplicationUniqueId);
+        
+        await publishEndpoint.Publish(notifyEntitlementDto);
 
         return entitlement.UniqueId;
     }

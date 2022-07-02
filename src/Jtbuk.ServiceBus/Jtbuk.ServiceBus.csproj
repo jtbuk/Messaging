@@ -10,6 +10,8 @@
 	<ItemGroup>		
 		<PackageReference Include="MassTransit" Version="8.0.3" />
 		<PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.0.3" />
+		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.20.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.20.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.6" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.6" />
@@ -23,6 +25,10 @@
 	  <Content Update="appsettings.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Features\AppInsights\" />
 	</ItemGroup>
 
 </Project>

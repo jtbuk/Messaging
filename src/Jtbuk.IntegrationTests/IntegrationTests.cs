@@ -38,20 +38,32 @@ namespace Jtbuk.IntegrationTests
                 new("Role A", Guid.NewGuid()),
                 new("Role B", Guid.NewGuid()),
             };
-            var applicationOne = new RegisterApplicationDto("Jack App", Guid.NewGuid(), applicationOneRoles);
+            var applicationOne = new RegisterApplicationDto("Generic App", Guid.NewGuid(), applicationOneRoles);
 
             var applicationTwoRoles = new List<RegisterRoleDto>()
             {
                 new("Admin", Guid.NewGuid()),
                 new("Sales", Guid.NewGuid()),
             };
-            var applicationTwo = new RegisterApplicationDto("Jack App", Guid.NewGuid(), applicationTwoRoles);
+            var applicationTwo = new RegisterApplicationDto("Sales App", Guid.NewGuid(), applicationTwoRoles);
+
+            var applicationThreeRoles = new List<RegisterRoleDto>()
+            {
+                new("Software Engineer", Guid.NewGuid()),
+                new("DBA", Guid.NewGuid()),
+            };
+
+            var applicationThreeUniqueId = Guid.NewGuid();
+            var applicationThree = new RegisterApplicationDto("Software App", applicationThreeUniqueId, applicationThreeRoles);
 
             var applicationOneResult = await client.PutAsJsonAsync("api/applications", applicationOne);
             applicationOneResult.EnsureSuccessStatusCode();
 
             var applicationTwoResult = await client.PutAsJsonAsync("api/applications", applicationTwo);
             applicationTwoResult.EnsureSuccessStatusCode();
+
+            var applicationThreeResult = await client.PutAsJsonAsync("api/applications", applicationThree);
+            applicationThreeResult.EnsureSuccessStatusCode();
 
             //Add a tenant
             var tenant = new CreateTenantDto("Tenant");
@@ -74,22 +86,42 @@ namespace Jtbuk.IntegrationTests
             });
             var applicationTwoHarness = GetTestHarness((o) =>
             {
-                o.AddConsumer<NotifyEntitlementConsumer>();
+                o.AddConsumer<NotifyEntitlementConsumer>();                
+            });
+            var applicationThreeHarness = GetTestHarness((o) =>
+            {
+                o.AddConsumer<NotifyEntitlementConsumer>(c =>
+                {
+                    c.UseContextFilter(f => 
+                        Task.FromResult(f.CorrelationId == applicationThree.UniqueId)
+                    );
+
+                    
+                });
+            }, (o) => {
+                o.SubscriptionEndpoint<NotifyEntitlementConsumer>("applicationThree", e =>
+                {
+                    //TODO - Figure out how to filter 
+                    //e.ConfigureConsumer<NotifyEntitlementConsumer>();
+                });
             });
 
             await applicationOneHarness.Start();
             
-            foreach (var application in applications!)
+            //Let's add the user to all apps other than application three
+            foreach (var application in applications!.Where(a => a.UniqueId != applicationThreeUniqueId))
             {
                 var role = application.Roles.First();
                 await client.PutAsJsonAsync("api/entitlements", new SetEntitlementDto(userUniqueId, application.UniqueId, role.UniqueId));
             }
             
-            bool applicationOneConsumed = await applicationOneHarness.Consumed.Any<NotifyEntitlementDto>();
-            bool applicationTwoConsumed = await applicationOneHarness.Consumed.Any<NotifyEntitlementDto>();
+            var applicationOneConsumed = applicationOneHarness.Consumed.Count();
+            var applicationTwoConsumed = applicationOneHarness.Consumed.Count();
+            var applicationThreeConsumed = applicationOneHarness.Consumed.Count();
 
-            Assert.True(applicationOneConsumed);
-            Assert.True(applicationTwoConsumed);
+            Assert.Equal(1, applicationOneConsumed);
+            Assert.Equal(1, applicationTwoConsumed);
+            Assert.Equal(0, applicationThreeConsumed);
         }
     }
 
