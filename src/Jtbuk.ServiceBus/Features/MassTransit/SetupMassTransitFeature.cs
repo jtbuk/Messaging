@@ -13,15 +13,15 @@ public static class SetupMassTransitFeature
         services.AddMassTransit(o =>
         {
             o.RegisterMockConsumers();
-            o.UsingInMemory((context, cfg) =>
-            {
-                cfg.ConfigureEndpoints(context);
-            });
-            //o.UsingAzureServiceBus((context, cfg) =>
+            //o.UsingInMemory((context, cfg) =>
             //{
-            //    cfg.Host(configuration.GetConnectionString("AzureServiceBus"));
             //    cfg.ConfigureEndpoints(context);
             //});
+            o.UsingAzureServiceBus((context, cfg) =>
+            {
+                cfg.Host(configuration.GetConnectionString("AzureServiceBus"));
+                cfg.ConfigureEndpoints(context);
+            });
             o.SetKebabCaseEndpointNameFormatter();
         });
 

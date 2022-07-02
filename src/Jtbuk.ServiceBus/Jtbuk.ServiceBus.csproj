@@ -3,8 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<!--<AnalysisLevel>All</AnalysisLevel>-->
+		<ImplicitUsings>enable</ImplicitUsings>		
 	  <UserSecretsId>e4f29acb-6f97-4e9f-8662-ac13ab5a7b0f</UserSecretsId>
   </PropertyGroup>
 
@@ -18,6 +17,12 @@
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Jtbuk.IntegrationTests" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update="appsettings.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
 </Project>

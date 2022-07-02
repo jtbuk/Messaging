@@ -13,12 +13,19 @@ builder.AddMassTransitSetup();
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-//services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
-services.AddDbContext<DatabaseContext>(options => options.UseInMemoryDatabase("Memory"));
+services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
+//services.AddDbContext<DatabaseContext>(options => options.UseInMemoryDatabase("Memory"));
 services.AddEndpointsApiExplorer();
 services.UseSwaggerFeature();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+    context.Database.EnsureDeleted();
+    context.Database.EnsureCreated();
+}
 
 app.AddSwaggerFeature();
 app.UseHttpsRedirection();

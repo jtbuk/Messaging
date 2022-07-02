@@ -5,30 +5,30 @@ using Jtbuk.ServiceBus.Features.Entitlements;
 using Jtbuk.ServiceBus.Features.Tenants;
 using Jtbuk.ServiceBus.Features.Users;
 using MassTransit;
+using MassTransit.Testing;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Json;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Jtbuk.IntegrationTests
-{    
-    public class IntegrationTests
-    {        
+{
+    public class IntegrationTests : BaseTest
+    {
         [Fact]
         public async void CreateEndToEnd()
-        {
-            var mockLogger = new Mock<ILogger<NotifyEntitlementDto>>();
-            var logger = mockLogger.Object;
-
-            var applicationOneConsumer = new GettingStartedConsumer(mockLogger.Object);
-
-            //Maybe do something like this for MassTransit?
-            //https://stackoverflow.com/questions/57541541/configure-masstransit-for-testing-with-webapplicationfactorystartup
+        {            
             var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder => { });
             var client = factory.CreateClient();
 
@@ -61,34 +61,43 @@ namespace Jtbuk.IntegrationTests
 
             //Add a user
             var user = new CreateUserDto("User", tenantUniqueId);
-            var createUserResult = await client.PostAsJsonAsync("api/users", tenant);
+            var createUserResult = await client.PostAsJsonAsync("api/users", user);
             createUserResult.EnsureSuccessStatusCode();
             var userUniqueId = (await createUserResult.Content.ReadFromJsonAsync<ApiValueResponse<Guid>>())!.Value;
 
             //Get the list of availabile applications
             var applications = await client.GetFromJsonAsync<List<GetApplicationDto>>("api/applications");
 
-            //Use entitlement to grant access for user
+            var applicationOneHarness = GetTestHarness((o) =>
+            {
+                o.AddConsumer<NotifyEntitlementConsumer>();
+            });
+            var applicationTwoHarness = GetTestHarness((o) =>
+            {
+                o.AddConsumer<NotifyEntitlementConsumer>();
+            });
+
+            await applicationOneHarness.Start();
+            
             foreach (var application in applications!)
             {
-                //application.UniqueId
                 var role = application.Roles.First();
                 await client.PutAsJsonAsync("api/entitlements", new SetEntitlementDto(userUniqueId, application.UniqueId, role.UniqueId));
             }
+            
+            bool applicationOneConsumed = await applicationOneHarness.Consumed.Any<NotifyEntitlementDto>();
+            bool applicationTwoConsumed = await applicationOneHarness.Consumed.Any<NotifyEntitlementDto>();
 
-            mockLogger.Setup(l => l.LogInformation(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>())).Callback(new InvocationAction(invocation => {
-                var args = invocation.Arguments[0];
-            }));
-
-            await Task.Delay(10000);
+            Assert.True(applicationOneConsumed);
+            Assert.True(applicationTwoConsumed);
         }
     }
 
-    public class GettingStartedConsumer : IConsumer<NotifyEntitlementDto>
+    public class NotifyEntitlementConsumer : IConsumer<NotifyEntitlementDto>
     {
         readonly ILogger<NotifyEntitlementDto> _logger;
 
-        public GettingStartedConsumer(ILogger<NotifyEntitlementDto> logger)
+        public NotifyEntitlementConsumer(ILogger<NotifyEntitlementDto> logger)
         {
             _logger = logger;
         }
@@ -96,9 +105,9 @@ namespace Jtbuk.IntegrationTests
         public Task Consume(ConsumeContext<NotifyEntitlementDto> context)
         {
             _logger.LogInformation(
-                "Entitlement Created: {UserUniqueId} {ApplicationUniqueId} {RoleUniqueId}", 
-                    context.Message.UserUniqueId, 
-                    context.Message.ApplicationUniqueId, 
+                "Entitlement Created: {UserUniqueId} {ApplicationUniqueId} {RoleUniqueId}",
+                    context.Message.UserUniqueId,
+                    context.Message.ApplicationUniqueId,
                     context.Message.RoleUniqueId);
 
             return Task.CompletedTask;
