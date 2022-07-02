@@ -19,9 +19,9 @@ namespace Jtbuk.IntegrationTests
 
         public ITestHarness GetTestHarness(
             Action<IBusRegistrationConfigurator>? addConfiguration = null,
-            Action<IServiceBusBusFactoryConfigurator>? addBusConfiguration = null)
+            Action<IServiceBusBusFactoryConfigurator>? addServiceBusConfiguration = null)
         {
-            var provider = new ServiceCollection()
+            var provider = new ServiceCollection()            
             .AddMassTransitTestHarness(o =>
             {                
                 o.UsingAzureServiceBus((context, cfg) =>
@@ -29,7 +29,7 @@ namespace Jtbuk.IntegrationTests
                     cfg.Host(Configuration.GetConnectionString("AzureServiceBus"));
                     cfg.ConfigureEndpoints(context);
 
-                    addBusConfiguration?.Invoke(cfg);
+                    addServiceBusConfiguration?.Invoke(cfg);
                 });
                 o.SetKebabCaseEndpointNameFormatter();
                 addConfiguration?.Invoke(o);

@@ -6,12 +6,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5F50F7A1-067B-4B8B-B472-61794644B491}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		README.md = README.md
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jtbuk.ServiceBus", "Jtbuk.ServiceBus\Jtbuk.ServiceBus.csproj", "{242257FD-8709-44F9-A2AE-670ADB5DAA70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jtbuk.IntegrationTests", "Jtbuk.IntegrationTests\Jtbuk.IntegrationTests.csproj", "{9CDAD201-1520-4C19-99CC-42B0A3B54E9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jtbuk.IntegrationTests", "Jtbuk.IntegrationTests\Jtbuk.IntegrationTests.csproj", "{9CDAD201-1520-4C19-99CC-42B0A3B54E9F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

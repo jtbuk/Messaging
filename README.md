@@ -24,3 +24,10 @@ Each topic has a dedicated output channel, and a consumer can subscribe to relev
 Each subscriber can specify the type of content it's interested in
 
 ## Queues
+
+## Command vs Event
+### Command
+Represent an intention e.g. Pass me the salt
+
+### Event
+Represent something that has happened e.g. Door opened

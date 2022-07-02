@@ -32,28 +32,6 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
-//Dunno how to clean up this logging...
-//var module = new DependencyTrackingTelemetryModule();
-//module.IncludeDiagnosticSourceActivities.Add("MassTransit");
-
-//TelemetryConfiguration telemetryConfiguration = TelemetryConfiguration.CreateDefault();
-//telemetryConfiguration.InstrumentationKey = "<your instrumentation key>";
-//telemetryConfiguration.TelemetryInitializers.Add(new HttpDependenciesParsingTelemetryInitializer());
-
-//var telemetryClient = new TelemetryClient(telemetryConfiguration);
-//module.Initialize(telemetryConfiguration);
-
-//var loggerOptions = new ApplicationInsightsLoggerOptions();
-
-//var applicationInsightsLoggerProvider = new ApplicationInsightsLoggerProvider(
-//    Options.Create(telemetryConfiguration),
-//    Options.Create(loggerOptions));
-
-//ILoggerFactory factory = new LoggerFactory();
-//factory.AddProvider(applicationInsightsLoggerProvider);
-
-//LogContext.ConfigureCurrentLogContext(factory);
-
 app.AddSwaggerFeature();
 app.UseHttpsRedirection();
 app.AddApplicationsFeature();
@@ -61,7 +39,5 @@ app.AddUsersFeature();
 app.AddTenantsFeature();
 app.AddEntitlementFeature();
 app.Run();
-
-telemetryClient.Flush();
 
 public partial class Program { }
